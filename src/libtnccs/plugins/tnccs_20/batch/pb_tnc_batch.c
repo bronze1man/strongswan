@@ -211,6 +211,9 @@ METHOD(pb_tnc_batch_t, build, void,
 			case PEN_TCG:
 				msg_infos = pb_tnc_tcg_msg_infos;
 				break;
+			case PEN_ITA:
+				msg_infos = pb_tnc_ita_msg_infos;
+				break;
 		}
 		if (msg_infos[msg_type.type].has_noskip_flag)
 		{
@@ -383,6 +386,11 @@ static status_t process_tnc_msg(private_pb_tnc_batch_t *this)
 	{
 		msg_type_names = pb_tnc_tcg_msg_type_names;
 		msg_infos = pb_tnc_tcg_msg_infos;
+	}
+	else if (vendor_id == PEN_ITA && msg_type <= PB_ITA_MSG_ROOF)
+	{
+		msg_type_names = pb_tnc_ita_msg_type_names;
+		msg_infos = pb_tnc_ita_msg_infos;
 	}
 	else
 	{

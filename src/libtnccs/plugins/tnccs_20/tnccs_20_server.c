@@ -105,19 +105,19 @@ struct private_tnccs_20_server_t {
 	bool eap_transport;
 
 	/**
-	 * PDP server FQDN
+	 * Mutual PB-TNC protocol enabled
 	 */
-	chunk_t pdp_server;
-
-	/**
-	 * PDP server port
-	 */
-	u_int16_t pdp_port;
+	bool mutual;
 
 };
 
-
-extern void tnccs_20_handle_ietf_error_msg(pb_tnc_msg_t *msg, bool *fatal_error);
+/**
+ * The following two functions are shared with the tnccs_20_server class
+ */
+extern void tnccs_20_handle_ietf_error_msg(pb_tnc_msg_t *msg,
+										   bool *fatal_error);
+extern void tnccs_20_handle_ita_mutual_capability_msg(pb_tnc_msg_t *msg,
+										   bool *mutual);
 
 /**
  * If the batch type changes then delete all accumulated PB-TNC messages
@@ -214,6 +214,23 @@ static void handle_ietf_message(private_tnccs_20_server_t *this, pb_tnc_msg_t *m
 }
 
 /**
+ * Handle a single PB-TNC ITA standard message according to its type
+ */
+static void handle_ita_message(private_tnccs_20_server_t *this, pb_tnc_msg_t *msg)
+{
+	pen_type_t msg_type = msg->get_type(msg);
+
+	switch (msg_type.type)
+	{
+		case PB_ITA_MSG_MUTUAL_CAPABILITY:
+			tnccs_20_handle_ita_mutual_capability_msg(msg, &this->mutual);
+			break;
+		default:
+			break;
+	}
+}
+
+/**
  * Handle a single PB-TNC message according to its type
  */
 static void handle_message(private_tnccs_20_server_t *this, pb_tnc_msg_t *msg)
@@ -224,6 +241,9 @@ static void handle_message(private_tnccs_20_server_t *this, pb_tnc_msg_t *msg)
 	{
 		case PEN_IETF:
 			handle_ietf_message(this, msg);
+			break;
+		case PEN_ITA:
+			handle_ita_message(this, msg);
 			break;
 		default:
 			break;
